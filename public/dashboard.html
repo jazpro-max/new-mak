@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gold Orb - Dashboard Workspace</title>
+    <style>
+        :root {
+            --bg-main: #060b13;
+            --card-dark: #111823;
+            --gold-gradient: linear-gradient(135deg, #ffd700, #f3a63b);
+            --pink-gradient: linear-gradient(135deg, #ff7b91, #ff4757);
+            --blue-card: #151f32;
+            --text-gold: #f1c40f;
+            --text-muted: #8fa0ba;
+            --border-subtle: #1e293b;
+        }
+
+        * { box-sizing: border-box; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-main); color: #fff; margin: 0; padding-bottom: 80px; }
+
+        /* Navigation Mechanics */
+        .page-view { display: none; }
+        .page-view.active-view { display: block; }
+
+        /* Top Bar App Navigation Header */
+        .app-header {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--card-dark);
+        }
+        .brand-title { font-weight: 900; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Layout Architecture Utilities */
+        .balance-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
+        .balance-box { padding: 15px; border-radius: 12px; color: #000; font-weight: bold; }
+        .balance-box.gold { background: var(--gold-gradient); }
+        .balance-box.pink { background: var(--pink-gradient); color: #fff; }
+        .balance-box .title { font-size: 0.8rem; opacity: 0.8; }
+        .balance-box .val { font-size: 1.2rem; margin: 5px 0 10px 0; }
+
+        .btn-action { background: rgba(0,0,0,0.6); color: #fff; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; }
+        .pink .btn-action { background: rgba(255,255,255,0.2); }
+
+        .list-group-item { background: var(--card-dark); margin: 10px 15px; padding: 15px; border-radius: 12px; border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;}
+
+        /* Persistent Navigation Fixed Bar Footer Layout */
+        .bottom-nav-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 65px;
+            background: #090e16;
+            border-top: 1px solid var(--border-subtle);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            z-index: 9999;
+        }
+        .nav-item { display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; }
+        .nav-item.active-nav { color: var(--text-gold); font-weight: bold; }
+        .nav-item .icon { font-size: 1.2rem; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+
+    <!-- VIEW 1: HOME PAGE -->
+    <div id="view-home" class="page-view active-view">
+        <div class="app-header">
+            <div class="brand-title">GOLD ORB HOME</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);" class="user-phone">070***</div>
+        </div>
+        
+        <div class="balance-card-grid">
+            <div class="balance-box gold">
+                <div class="title">Available Balance</div>
+                <div class="val wallet-lbl">UGX 0</div>
+                <button class="btn-action" onclick="switchRoute('view-wallet')">Withdraw</button>
+            </div>
+            <div class="balance-box pink">
+                <div class="title">Team Commissions</div>
+                <div class="val commission-lbl">UGX 0</div>
+                <button class="btn-action" onclick="switchRoute('view-wallet')">Claim</button>
+            </div>
+        </div>
+
+        <div style="padding: 15px; font-weight: bold; color: var(--text-gold);">🔥 Investment Leases Available</div>
+        <div class="list-group-item">
+            <div>
+                <strong>High-Purity Gold Machine</strong>
+                <div style="color: var(--text-muted); font-size:0.8rem; margin-top:3px;">Cost: 300,000 UGX | Income: 165,000/Day</div>
+            </div>
+            <button class="btn-action" style="background:var(--gold-gradient); color:#000;" onclick="buyProduct('High-Purity Gold', 300000, 165000)">Rent</button>
+        </div>
+    </div>
+
+    <!-- VIEW 2: ORDER PAGE -->
+    <div id="view-orders" class="page-view">
+        <div class="app-header"><div class="brand-title">ACTIVE HARDWARE LEASES</div></div>
+        <div style="padding:20px; text-align:center; color: var(--text-muted);" id="empty-orders-state">
+            No active machine investments found. Use the Home section to spin up your mining lease!
+        </div>
+        <div id="orders-mount-container"></div>
+    </div>
+
+    <!-- VIEW 3: TEAM REFERRALS PAGE -->
+    <div id="view-team" class="page-view">
+        <div class="app-header"><div class="brand-title">MY TEAM DISPATCH</div></div>
+        <div class="list-group-item" style="background: var(--blue-card); text-align: center; flex-direction: column; gap: 10px;">
+            <span style="color: var(--text-muted); font-size: 0.85rem;">YOUR INVITE CODE</span>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #fff;" id="invite-code-display">6391524</div>
+        </div>
+    </div>
+
+    <!-- VIEW 4: WALLET MANAGEMENT AND PROFILE SETTINGS PAGE -->
+    <div id="view-wallet" class="page-view">
+        <div class="app-header"><div class="brand-title">MY ACCOUNT WALLET</div></div>
+        <div class="list-group-item">
+            <div>Available Balance</div>
+            <div style="font-size: 1.3rem; font-weight: bold; color: var(--text-gold);" class="wallet-lbl">UGX 0</div>
+        </div>
+        
+        <div class="list-group-item">
+            <span>Link Payment Phone:</span>
+            <strong class="user-phone">0700000000</strong>
+        </div>
+
+        <div style="padding: 15px;">
+            <button class="btn-action" style="width:100%; padding:12px; font-size:1rem; background: var(--gold-gradient); color:#000; font-weight:bold; border-radius:8px;" onclick="window.location.href='/login.html'">Sign Out of Session</button>
+        </div>
+    </div>
+
+    <!-- PERSISTENT STICKY FOOTER MENUS CONTAINER -->
+    <div class="bottom-nav-bar">
+        <div class="nav-item active-nav" id="btn-nav-home" onclick="switchRoute('view-home', this)">
+            <span class="icon">🧱</span><span>Home</span>
+        </div>
+        <div class="nav-item" id="btn-nav-orders" onclick="switchRoute('view-orders', this)">
+            <span class="icon">📈</span><span>Order</span>
+        </div>
+        <div class="nav-item" id="btn-nav-team" onclick="switchRoute('view-team', this)">
+            <span class="icon">👥</span><span>Team</span>
+        </div>
+        <div class="nav-item" id="btn-nav-wallet" onclick="switchRoute('view-wallet', this)">
+            <span class="icon">👤</span><span>Me</span>
+        </div>
+    </div>
+
+    <script>
+        function switchRoute(targetViewId, navElement) {
+            // Toggle Content Panels Visibility
+            document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active-view'));
+            document.getElementById(targetViewId).classList.add('active-view');
+
+            // Synchronize Highlights across Bottom Navigation
+            if(navElement) {
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active-nav'));
+                navElement.classList.add('active-nav');
+            }
+        }
+
+        async function refreshUserCoreSession() {
+            try {
+                const res = await fetch('/api/user/profile');
+                if(!res.ok) { window.location.href = '/login.html'; return; }
+                const data = await res.json();
+
+                // Assign text tokens directly to layout selectors safely
+                document.querySelectorAll('.wallet-lbl').forEach(el => el.innerText = `UGX ${parseFloat(data.balance || 0).toLocaleString()}`);
+                document.querySelectorAll('.commission-lbl').forEach(el => el.innerText = `UGX ${parseFloat(data.commission || 0).toLocaleString()}`);
+                document.querySelectorAll('.user-phone').forEach(el => el.innerText = data.phone);
+                document.getElementById('invite-code-display').innerText = data.invitation_code || '6391524';
+
+                // Setup Machine Layouts Data Loops
+                const container = document.getElementById('orders-mount-container');
+                const emptyMsg = document.getElementById('empty-orders-state');
+                container.innerHTML = '';
+                
+                if(data.orders && data.orders.length > 0) {
+                    emptyMsg.style.display = 'none';
+                    data.orders.forEach(order => {
+                        const div = document.createElement('div');
+                        div.className = 'list-group-item';
+                        div.innerHTML = `<div><strong>${order.product_name}</strong><br><small style="color:var(--text-muted)">Daily Yield: UGX ${order.daily_income}</small></div><span style="color:#2ed573">● Processing</span>`;
+                        container.appendChild(div);
+                    });
+                } else {
+                    emptyMsg.style.display = 'block';
+                }
+
+            } catch (err) {
+                window.location.href = '/login.html';
+            }
+        }
+
+        async function buyProduct(name, price, dailyIncome) {
+            if(!confirm(`Confirm authorization to invest UGX ${price.toLocaleString()}?`)) return;
+            const res = await fetch('/api/user/buy-product', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ productName: name, price, dailyIncome })
+            });
+            const data = await res.json();
+            alert(data.message);
+            refreshUserCoreSession();
+        }
+
+        window.onload = refreshUserCoreSession;
+    </script>
+</body>
+</html>
