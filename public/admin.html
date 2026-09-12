@@ -1,1 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gold Orb - Admin Command Center</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --text-main: #c9d1d9;
+            --accent-gold: #ffd700;
+            --green-success: #238636;
+            --red-danger: #da3637;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            color: var(--accent-gold);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        /* Metrics Grid Dashboard */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .metric-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #8b949e;
+        }
+
+        .metric-card .value {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .metric-card.gold .value { color: var(--accent-gold); }
+        .metric-card.green .value { color: #58a6ff; }
+
+        /* Tables & Interactivity */
+        .table-responsive {
+            overflow-x: auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: #21262d;
+            color: var(--accent-gold);
+        }
+
+        tr:hover {
+            background-color: #21262d;
+        }
+
+        /* Forms & Buttons */
+        input, select {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        button {
+            background-color: var(--green-success);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button.danger-btn {
+            background-color: var(--red-danger);
+        }
+
+        .password-field {
+            font-family: monospace;
+            background: #0d1117;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px dashed #484f58;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Gold Orb - Executive Control Panel</h1>
+
+    <!-- FINANCIAL METRICS ENGINE -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <h3>Total Registered Clients</h3>
+            <div class="value" id="metric-total-users">0</div>
+        </div>
+        <div class="metric-card gold">
+            <h3>Total Vault Balances</h3>
+            <div class="value" id="metric-total-balance">UGX 0</div>
+        </div>
+        <div class="metric-card">
+            <h3>Total Commissions Paid</h3>
+            <div class="value" id="metric-total-commission">UGX 0</div>
+        </div>
+        <div class="metric-card green">
+            <h3>Active Investment Orders</h3>
+            <div class="value" id="metric-total-orders">0</div>
+        </div>
+    </div>
+
+    <!-- CLIENT USER MANAGEMENT DIRECTORY -->
+    <h2>Client Directory & Security Controls</h2>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Phone Number</th>
+                    <th>Account Password</th>
+                    <th>Wallet Balance</th>
+                    <th>Commissions</th>
+                    <th>Referrals Count</th>
+                    <th>Invite Code</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body">
+                <!-- Dynamic Content injected via Javascript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- LIVE INVESTMENT LEASE TRACKER -->
+    <h2 style="margin-top: 40px;">Active Client Investment Leases</h2>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Lease ID</th>
+                    <th>Client Phone</th>
+                    <th>Product Name</th>
+                    <th>Price Paid</th>
+                    <th>Daily Income</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="orders-table-body">
+                <!-- Dynamic Content injected via Javascript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Fetch and populate all system arrays dynamically
+    async function loadAdminDashboard() {
+        try {
+            const response = await fetch('/api/admin/users');
+            const data = await response.json();
+
+            const users = data.users || [];
+            const orders = data.orders || [];
+
+            // Calculate Dynamic Dash Financial Ecosystem Metrics
+            let totalBalance = 0;
+            let totalCommission = 0;
+
+            users.forEach(user => {
+                totalBalance += parseFloat(user.balance || 0);
+                totalCommission += parseFloat(user.commission || 0);
+            });
+
+            document.getElementById('metric-total-users').innerText = users.length;
+            document.getElementById('metric-total-balance').innerText = `UGX ${totalBalance.toLocaleString()}`;
+            document.getElementById('metric-total-commission').innerText = `UGX ${totalCommission.toLocaleString()}`;
+            document.getElementById('metric-total-orders').innerText = orders.length;
+
+            // Render Client Database Directory Rows
+            const usersTable = document.getElementById('users-table-body');
+            usersTable.innerHTML = '';
+            
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.id}</td>
+                    <td><strong>${user.phone}</strong></td>
+                    <td><span class="password-field">${user.password}</span></td>
+                    <td>UGX ${(user.balance || 0).toLocaleString()}</td>
+                    <td>UGX ${(user.commission || 0).toLocaleString()}</td>
+                    <td>${user.referrals_count || 0} users</td>
+                    <td><code>${user.invitation_code || 'None'}</code></td>
+                    <td>
+                        <input type="number" id="amt-${user.phone}" placeholder="Amount" style="width: 80px;">
+                        <select id="type-${user.phone}">
+                            <option value="balance">Wallet</option>
+                            <option value="commission">Commission</option>
+                        </select>
+                        <button onclick="updateUserFunds('${user.phone}')">Modify</button>
+                        <button class="danger-btn" onclick="triggerAccountReset('${user.phone}')">Reset Account</button>
+                    </td>
+                `;
+                usersTable.appendChild(tr);
+            });
+
+            // Render Active Running Investment Trackers
+            const ordersTable = document.getElementById('orders-table-body');
+            ordersTable.innerHTML = '';
+            orders.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>#${order.id}</td>
+                    <td>${order.phone}</td>
+                    <td><span style="color:var(--accent-gold); font-weight:bold;">${order.product_name}</span></td>
+                    <td>UGX ${(order.price || 0).toLocaleString()}</td>
+                    <td>UGX ${(order.daily_income || 0).toLocaleString()} / day</td>
+                    <td><span style="background: #238636; padding: 2px 6px; border-radius:4px; font-size:0.8rem;">${order.status}</span></td>
+                `;
+                ordersTable.appendChild(tr);
+            });
+
+        } catch (err) {
+            console.error("Failed executing structural administrative data fetch:", err);
+        }
+    }
+
+    // Interactive Core: Direct Balance Adjustment Functions
+    async function updateUserFunds(phone) {
+        const amtInput = document.getElementById(`amt-${phone}`);
+        const typeSelect = document.getElementById(`type-${phone}`);
+        
+        if(!amtInput.value) return alert("Please specify an amount parameter!");
+
+        const response = await fetch('/api/admin/update-balance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                phone: phone,
+                newBalance: amtInput.value,
+                type: typeSelect.value
+            })
+        });
+
+        const data = await response.json();
+        if(data.success) {
+            alert(`Successfully updated financial record for ${phone}`);
+            loadAdminDashboard();
+        }
+    }
+
+    // Dynamic Engine Extension: Full Administrative Account Reset Function
+    async function triggerAccountReset(phone) {
+        if(!confirm(`Are you absolutely sure you want to completely clear balances, commissions, and reset referrals count to 0 for subscriber: ${phone}?`)) return;
+
+        // Reset user metrics cleanly to zero state
+        const resetWallet = fetch('/api/admin/update-balance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phone, newBalance: 0, type: 'balance' })
+        });
+
+        const resetCommission = fetch('/api/admin/update-balance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phone, newBalance: 0, type: 'commission' })
+        });
+
+        await Promise.all([resetWallet, resetCommission]);
+        alert(`Account reset configurations completed safely for profile ${phone}`);
+        loadAdminDashboard();
+    }
+
+    // Initialize Dashboard Application State on page render
+    window.onload = loadAdminDashboard;
+</script>
+</body>
+</html>
